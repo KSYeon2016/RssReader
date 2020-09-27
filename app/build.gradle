@@ -33,5 +33,9 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+    
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
+
+    // 코루틴을 UI 스레드로 제한하기 위해 구현된 CoroutineDispatcher
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
 }

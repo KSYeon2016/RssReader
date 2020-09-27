@@ -3,6 +3,7 @@ package kr.co.example.rssreader
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.newSingleThreadContext
@@ -23,12 +24,17 @@ class MainActivity : AppCompatActivity() {
         // 특정 디스패처로 코루틴 실행
         GlobalScope.launch(netDispatcher) {
             val headlines = fetchRssHeadlines()
-            newsCount.text = "Found ${ headlines.size } News" // CalledFromWrongThreadException Error
+//            newsCount.text = "Found ${ headlines.size } News" // CalledFromWrongThreadException Error
             /*
             * CalledFromWrongThreadException :
             * 코루틴의 내용은 백그라운드 스레드에서 실행 중이며
             * UI 업데이트는 UI 스레드에서 일어나야 함
             */
+
+            // 안드로이드의 UI 코루틴 디스패처 사용
+            GlobalScope.launch(Dispatchers.Main) {
+                newsCount.text = "Found ${ headlines.size } News"
+            }
         }
     }
 
