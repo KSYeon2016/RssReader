@@ -3,10 +3,7 @@ package kr.co.example.rssreader
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.newSingleThreadContext
+import kotlinx.coroutines.*
 import org.w3c.dom.Element
 import org.w3c.dom.Node
 import javax.xml.parsers.DocumentBuilderFactory
@@ -51,7 +48,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     // 미리 정의된 디스패처를 갖는 비동기 함수
-    private fun asyncLoadNews() = GlobalScope.launch(netDispatcher) {
+    // 유연한 디스패처를 가지는 비동기 함수 : 단점 - 함수에 적절한 이름이 주어졌을 때만 명시적
+    private fun asyncLoadNews(dispatcher: CoroutineDispatcher = netDispatcher) = GlobalScope.launch(dispatcher) {
         val headlines = fetchRssHeadlines()
         GlobalScope.launch(Dispatchers.Main) {
             newsCount.text = "Found ${ headlines.size } News"
