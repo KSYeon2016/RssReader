@@ -43,6 +43,19 @@ class MainActivity : AppCompatActivity() {
         GlobalScope.launch(netDispatcher) {
             loadNews()
         }
+
+        // 미리 정의된 디스패처를 갖는 비동기 함수
+        // launch()를 포함하고 결과인 Job을 반환하는 함수
+        // Job을 반환해서 호출자가 취소할 수 있음
+        asyncLoadNews()
+    }
+
+    // 미리 정의된 디스패처를 갖는 비동기 함수
+    private fun asyncLoadNews() = GlobalScope.launch(netDispatcher) {
+        val headlines = fetchRssHeadlines()
+        GlobalScope.launch(Dispatchers.Main) {
+            newsCount.text = "Found ${ headlines.size } News"
+        }
     }
 
     // 비동기 호출자로 감싼 동기 함수
