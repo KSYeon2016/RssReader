@@ -36,6 +36,21 @@ class MainActivity : AppCompatActivity() {
                 newsCount.text = "Found ${ headlines.size } News"
             }
         }
+
+        // 비동기 호출자로 감싼 동기 함수
+        // 비동기로 실행되는 코드라는 것을 명시적으로 나타내는 좋은 사례
+        // loadNews() 호출이 많으면 유사한 블록이 코드에 많이 분산돼 가시성이 떨어짐
+        GlobalScope.launch(netDispatcher) {
+            loadNews()
+        }
+    }
+
+    // 비동기 호출자로 감싼 동기 함수
+    private fun loadNews() {
+        val headlines = fetchRssHeadlines()
+        GlobalScope.launch(Dispatchers.Main) {
+            newsCount.text = "Found ${ headlines.size } News"
+        }
     }
 
     // feed를 호출한 후 응답Response의 본문body을 읽고 헤드라인을 반환
