@@ -59,6 +59,23 @@ class MainActivity : AppCompatActivity() {
         asyncLoadNews()
     }
 
+    private fun asyncLoadNews2() = GlobalScope.launch {
+        // 동시에 여러 피드에 요청을 보내야 함
+        // 목록에서 각 피드 당 하나의 디퍼드를 생성함
+        // 따라서 대기하는 모든 디퍼드를 추적할 수 있는 목록 생성
+        val requests = mutableListOf<Deferred<List<String>>>()
+
+        // 각 피드별로 가져온 요소를 피드 목록에 추가
+        feeds.mapTo(requests) {
+            asyncFetchHeadlines(it, dispatcher)
+        }
+
+        // 각 코드가 완료될 때까지 대기하는 코드 추가
+        requests.forEach {
+            it.await()
+        }
+    }
+
     // 미리 정의된 디스패처를 갖는 비동기 함수
     // 유연한 디스패처를 가지는 비동기 함수 : 단점 - 함수에 적절한 이름이 주어졌을 때만 명시적
     private fun asyncLoadNews(dispatcher: CoroutineDispatcher = netDispatcher) = GlobalScope.launch(dispatcher) {
