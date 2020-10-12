@@ -30,33 +30,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // 특정 디스패처로 코루틴 실행
-        GlobalScope.launch(netDispatcher) {
-            val headlines = fetchRssHeadlines()
-//            newsCount.text = "Found ${ headlines.size } News" // CalledFromWrongThreadException Error
-            /*
-            * CalledFromWrongThreadException :
-            * 코루틴의 내용은 백그라운드 스레드에서 실행 중이며
-            * UI 업데이트는 UI 스레드에서 일어나야 함
-            */
-
-            // 안드로이드의 UI 코루틴 디스패처 사용
-            GlobalScope.launch(Dispatchers.Main) {
-                newsCount.text = "Found ${ headlines.size } News"
-            }
-        }
-
-        // 비동기 호출자로 감싼 동기 함수
-        // 비동기로 실행되는 코드라는 것을 명시적으로 나타내는 좋은 사례
-        // loadNews() 호출이 많으면 유사한 블록이 코드에 많이 분산돼 가시성이 떨어짐
-        GlobalScope.launch(netDispatcher) {
-            loadNews()
-        }
-
         // 미리 정의된 디스패처를 갖는 비동기 함수
         // launch()를 포함하고 결과인 Job을 반환하는 함수
         // Job을 반환해서 호출자가 취소할 수 있음
-        asyncLoadNews()
+        asyncLoadNews2()
     }
 
     private fun asyncLoadNews2() = GlobalScope.launch {
@@ -73,6 +50,16 @@ class MainActivity : AppCompatActivity() {
         // 각 코드가 완료될 때까지 대기하는 코드 추가
         requests.forEach {
             it.await()
+        }
+
+        // 각 디퍼드의 내용을 담은 변수
+        val headlines = requests.flatMap {
+            it.getCompleted()
+        }
+
+        // 헤드라인의 개수와 가져온 피드 개수 UI에 표시
+        GlobalScope.launch(Dispatchers.Main) {
+            newsCount.text = "Found ${ headlines.size } News in ${ requests.size } feeds"
         }
     }
 
