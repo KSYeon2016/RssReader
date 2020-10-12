@@ -20,6 +20,11 @@ class MainActivity : AppCompatActivity() {
         "http://rss.cnn.com/rss/cnn_topstories.rss",
         "http://feeds.foxnews.com/foxnews/politics?format=xml"
     )
+    // 크기가 2인 스레드 풀을 만들고 IO로 이름을 변경
+    // asyncFetchHeadlines()는 서버에서 정보를 가져올 뿐 아니라 파싱도 하기 때문에 풀의 크기를 늘림
+    // XML을 파싱하는 오버 헤드는 단일 스레드를 사용하는 경우 성능에 영향
+    // 때로는 다른 스레드의 파싱이 완료될 때까지 한 피드로부터 정보를 가져오는 것이 지연될 수 있음
+    val dispatcher = newFixedThreadPoolContext(2, "IO")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
