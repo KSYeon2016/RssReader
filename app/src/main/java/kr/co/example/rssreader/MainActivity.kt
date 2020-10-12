@@ -14,6 +14,13 @@ class MainActivity : AppCompatActivity() {
     private val netDispatcher = newSingleThreadContext(name = "ServiceCall")
     private val factory = DocumentBuilderFactory.newInstance()
 
+    // immutable list
+    val feeds = listOf(
+        "https://www.npr.org/rss/rss.php?id=1001",
+        "http://rss.cnn.com/rss/cnn_topstories.rss",
+        "http://feeds.foxnews.com/foxnews/politics?format=xml"
+    )
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -72,6 +79,21 @@ class MainActivity : AppCompatActivity() {
 
         // 단순히 XML의 모든 요소들을 검사하면서 피드에 있는 각 기사article의 제목title을 제외한 모든 것을 필터링
         return (0 until news.childNodes.length)
+            .asSequence()
+            .map { news.childNodes.item(it) }
+            .filter { Node.ELEMENT_NODE == it.nodeType }
+            .map { it as Element }
+            .filter { "item" == it.tagName }
+            .map { it.getElementsByTagName("title").item(0).textContent }
+            .toList()
+    }
+
+    private fun asyncFetchHeadlines(feed: String, dispatcher: CoroutineDispatcher) = GlobalScope.async(dispatcher) {
+        val builder = factory.newDocumentBuilder()
+        val xml = builder.parse(feed)  // feed 인수를 URL로 사용
+        val news = xml.getElementsByTagName("channel").item(0)
+
+        (0 until news.childNodes.length)
             .asSequence()
             .map { news.childNodes.item(it) }
             .filter { Node.ELEMENT_NODE == it.nodeType }
